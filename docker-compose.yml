@@ -54,7 +54,7 @@ services:
       orchestrator:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9876/"]
+      test: ["CMD", "curl", "-f", "http://localhost:9876/health"]
       interval: 15s
       timeout: 5s
       retries: 3
