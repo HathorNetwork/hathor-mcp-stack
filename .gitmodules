@@ -1,0 +1,8 @@
+[submodule "hathor-mcp"]
+	path = hathor-mcp
+	url = https://github.com/HathorNetwork/hathor-mcp.git
+	branch = feat/deployment
+[submodule "headless-orchestrator"]
+	path = headless-orchestrator
+	url = https://github.com/HathorNetwork/headless-orchestrator.git
+	branch = feat/deployment

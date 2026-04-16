@@ -1,0 +1,61 @@
+networks:
+  stack:
+    # Explicit name so the orchestrator can attach spawned sibling
+    # containers to the same network regardless of the compose project
+    # name that Dokploy assigns.
+    name: hathor-mcp-stack
+
+services:
+  # Multi-tenant wallet-headless orchestrator. Spawns per-session
+  # wallet-headless Docker containers via the host's Docker socket
+  # and attaches them to the `hathor-mcp-stack` network so the MCP
+  # server (and the proxy) can reach them by container name.
+  orchestrator:
+    build:
+      context: ./headless-orchestrator
+    command:
+      - "--port=8100"
+      - "--fullnode-url=https://node1.playground.testnet.hathor.network/v1a/"
+      - "--network=testnet"
+      - "--docker-network=hathor-mcp-stack"
+      - "--headless-image=hathornetwork/hathor-wallet-headless:latest"
+      - "--idle-timeout-secs=1800"
+      - "--max-instances=50"
+    volumes:
+      # Needed so the orchestrator can spawn sibling containers on the host.
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - stack
+    ports:
+      - "8100:8100"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8100/sessions"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # MCP server for Claude / other AI agents. Talks to the orchestrator
+  # for isolated, per-session wallet-headless instances.
+  mcp:
+    build:
+      context: ./hathor-mcp
+    command:
+      - "--port=9876"
+      - "--fullnode-url=https://node1.playground.testnet.hathor.network"
+      - "--orchestrator-url=http://orchestrator:8100"
+    networks:
+      - stack
+    ports:
+      - "9876:9876"
+    restart: unless-stopped
+    depends_on:
+      orchestrator:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9876/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
