@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Hathor Testnet Faucet</title>
-<meta name="description" content="Dynamic Hathor testnet faucet. Send HTR to your testnet address in one click." />
+<title>Hathor Playground Testnet Faucet</title>
+<meta name="description" content="Dynamic Hathor Playground Testnet faucet. Send HTR to your testnet address in one click." />
 <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAG1BMVEVMaXEjHh8jHiAjHh8jHx8jHx8jHyAiHx8jHyAcA8nyAAAACHRSTlMA+bgp2IhuVZDwydoAAAAJcEhZcwAACxMAAAsTAQCanBgAAAG8SURBVHjarZfbAoMgCEBDQPz/L56pm12QNMbLWspJERC2bSAoHAIRAFEILLgtCTJBOgkQzzMiFZUsTbk9UZxSZyg66SLlDfDz10HT7gywV4EhT0mG5MFg2ELAVq8IkOHu07N+mTKwRJhRr4jg0h8QFvRVAq/o74SLHWRNfyeczgIX1QsC3xpAMUO86YOgoG0XSN2rQV/fk2HAOIEZQD8JSO9W8F1CTG+30KxAFgCgZ6Y7gIoPDA/5sIIRA0dO3AA5D3KMzKQHejUjjQHwyz6iz9r3oHtxAUR+dNY8T0YDM/G+hxTbgGyAdqMg6EYIFkDqWBg6bB6yAFJvpRZ4qIckGYDvGKT29y6kvm0AvISN9i3adAf5eiIck4d6Dpvho3LJPjqAlDuUiAog/8IDgO4bO6aqpmQCggeg+sEqgO+AELuQaYP9fGfuJAMgeox0eTjG3V9opirRATUpXo2Q94VdTCNWF8fk8ANUYmQe0NL69WI5b4Ea4PesfepFcXC+XTm9QhzKHPAtQL9eJxYQ/1fi+Issd5nnLzT9pa6/2PaX+/6Gw9/y+Jsuf9v3h8bz3PrC6WGy9f1D873U/n8AeOpToAtAg9AAAAAASUVORK5CYII=" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -197,15 +197,15 @@
       <div class="mark"><span>h</span></div>
       <div class="wordmark"><b>hathor</b>&nbsp;<span>/faucet</span></div>
     </div>
-    <div class="net"><span class="dot"></span><span id="netLabel">testnet</span></div>
+    <div class="net"><span class="dot"></span><span id="netLabel">playground testnet</span></div>
   </header>
 
   <div class="kicker">drip without ceremony</div>
-  <h1>Claim <span class="accent">testnet HTR</span><br/>for building.</h1>
-  <p class="sub">Paste a testnet address and we'll send you a drip. The amount scales with whatever's left in the tank — so if it's dry, be kind, ping us.</p>
+  <h1>Claim <span class="accent">Playground Testnet HTR</span><br/>for building.</h1>
+  <p class="sub">Paste a Playground Testnet address and we'll send you a drip. The amount scales with whatever's left in the tank — so if it's dry, be kind, ping us.</p>
 
   <section class="card">
-    <label for="address">Testnet address</label>
+    <label for="address">Playground Testnet address</label>
     <div class="row">
       <input id="address" type="text" autocomplete="off" spellcheck="false" placeholder="Wxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
       <button id="drip" class="primary" type="button">Drip me HTR</button>
@@ -234,7 +234,7 @@
         <span id="faucetAddr" class="addr-mono">loading…</span>
       </div>
       <div>
-        <a id="explorerLink" href="https://explorer.testnet.hathor.network/" target="_blank" rel="noopener">explorer ↗</a>
+        <a id="explorerLink" href="https://explorer.playground.testnet.hathor.network/" target="_blank" rel="noopener">explorer ↗</a>
       </div>
     </div>
   </section>
@@ -265,7 +265,7 @@
       const s = await r.json();
       $('bal').textContent = fmt(s.balance_htr);
       $('dripAmt').textContent = fmt(s.drip_htr);
-      $('netLabel').textContent = s.network || 'testnet';
+      $('netLabel').textContent = s.network || 'playground testnet';
       $('faucetAddr').textContent = s.address || '(not ready)';
       const tier = $('tier');
       tier.className = 'tier-chip ' + (s.tier || '');
@@ -314,7 +314,7 @@
   async function drip(){
     const addr = $('address').value.trim();
     if (!addr) {
-      showMsg('err', 'paste a testnet address first.');
+      showMsg('err', 'paste a Playground Testnet address first.');
       return;
     }
     const btn = $('drip');
@@ -329,7 +329,7 @@
       });
       const data = await r.json().catch(() => ({}));
       if (r.ok && data.success) {
-        const tx = data.tx_hash ? `<br/><span class="addr-mono">tx: <a href="https://explorer.testnet.hathor.network/transaction/${data.tx_hash}" target="_blank" rel="noopener">${data.tx_hash}</a></span>` : '';
+        const tx = data.tx_hash ? `<br/><span class="addr-mono">tx: <a href="https://explorer.playground.testnet.hathor.network/transaction/${data.tx_hash}" target="_blank" rel="noopener">${data.tx_hash}</a></span>` : '';
         showMsg('ok', `sent ${fmt(data.amount_htr)} HTR — it should land in your wallet in a few seconds.${tx}`);
         confetti();
         loadStatus();

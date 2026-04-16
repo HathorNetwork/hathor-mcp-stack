@@ -2,7 +2,7 @@
 name = "hathor-faucet"
 version = "0.1.0"
 edition = "2021"
-description = "Hathor testnet faucet with dynamic drip and IP rate limiting"
+description = "Hathor Playground Testnet faucet with dynamic drip and IP rate limiting"
 authors = ["Hathor Labs"]
 license = "MIT"
 

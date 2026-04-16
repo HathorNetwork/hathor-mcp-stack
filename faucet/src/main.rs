@@ -193,7 +193,7 @@ async fn status_handler(State(state): State<AppState>) -> impl IntoResponse {
         cooldown_secs: COOLDOWN_SECS,
         tier,
         available: drip > 0.0,
-        network: "testnet",
+        network: "playground testnet",
     };
     Json(resp)
 }
