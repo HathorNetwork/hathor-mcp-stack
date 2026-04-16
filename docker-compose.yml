@@ -66,6 +66,11 @@ services:
   # the faucet frontend can always show a balance.
   faucet-wallet:
     image: hathornetwork/hathor-wallet-headless:latest
+    pull_policy: always
+    # Matches the known-working x402-poc pattern: explicit node entrypoint
+    # (the default image entrypoint has a pre-flight wrapper that rejects
+    # some env combinations).
+    entrypoint: ["node", "dist/index.js"]
     environment:
       HEADLESS_HTTP_BIND: "0.0.0.0"
       HEADLESS_HTTP_PORT: "8000"
@@ -78,7 +83,7 @@ services:
       - stack
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/ || exit 0"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8000/',r=>{process.exit(r.statusCode<500?0:1)}).on('error',()=>process.exit(1))"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -122,8 +127,10 @@ services:
     ports:
       - "8300:80"
     restart: unless-stopped
+    # nginx:alpine doesn't always expose a healthcheck-friendly binary;
+    # use wget from busybox with CMD-SHELL so PATH resolves it.
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      test: ["CMD-SHELL", "wget --spider -q http://localhost/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 3
