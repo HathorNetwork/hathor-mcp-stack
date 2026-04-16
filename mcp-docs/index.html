@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Hathor MCP · Connect your AI agent to Hathor</title>
+<meta name="description" content="Install the Hathor MCP server in Claude Desktop or Claude Code and give your AI agent first-class access to the Hathor blockchain, wallets, and nano contracts." />
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAG1BMVEVMaXEjHh8jHiAjHh8jHx8jHx8jHyAiHx8jHyAcA8nyAAAACHRSTlMA+bgp2IhuVZDwydoAAAAJcEhZcwAACxMAAAsTAQCanBgAAAG8SURBVHjarZfbAoMgCEBDQPz/L56pm12QNMbLWspJERC2bSAoHAIRAFEILLgtCTJBOgkQzzMiFZUsTbk9UZxSZyg66SLlDfDz10HT7gywV4EhT0mG5MFg2ELAVq8IkOHu07N+mTKwRJhRr4jg0h8QFvRVAq/o74SLHWRNfyeczgIX1QsC3xpAMUO86YOgoG0XSN2rQV/fk2HAOIEZQD8JSO9W8F1CTG+30KxAFgCgZ6Y7gIoPDA/5sIIRA0dO3AA5D3KMzKQHejUjjQHwyz6iz9r3oHtxAUR+dNY8T0YDM/G+hxTbgGyAdqMg6EYIFkDqWBg6bB6yAFJvpRZ4qIckGYDvGKT29y6kvm0AvISN9i3adAf5eiIck4d6Dpvho3LJPjqAlDuUiAog/8IDgO4bO6aqpmQCggeg+sEqgO+AELuQaYP9fGfuJAMgeox0eTjG3V9opirRATUpXo2Q94VdTCNWF8fk8ANUYmQe0NL69WI5b4Ea4PesfepFcXC+XTm9QhzKHPAtQL9eJxYQ/1fi+Issd5nnLzT9pa6/2PaX+/6Gw9/y+Jsuf9v3h8bz3PrC6WGy9f1D873U/n8AeOpToAtAg9AAAAAASUVORK5CYII=" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Aldrich&family=Fragment+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#000829;
+    --navy-900:#000e5e;
+    --navy-800:#081c8d;
+    --ink:#ffffff;
+    --ink-muted:#a9b1d6;
+    --ink-dim:#6d7699;
+    --line:rgba(191,246,88,.18);
+    --line-strong:rgba(191,246,88,.45);
+    --acid:#bff658;
+    --acid-soft:#9cf35b;
+    --acid-hot:#6eff00;
+    --cyan:#0dcbff;
+    --code-bg:#050a38;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;min-height:100%;}
+  body{
+    background:
+      radial-gradient(1000px 700px at 85% -10%, rgba(13,203,255,.18), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(191,246,88,.12), transparent 60%),
+      linear-gradient(180deg, #000829 0%, #000616 100%);
+    overflow-x:hidden;
+  }
+  .grid-bg{
+    position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.32;
+    background-image:
+      linear-gradient(rgba(13,203,255,.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,203,255,.08) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+  }
+  .glow{position:fixed;z-index:0;pointer-events:none;filter:blur(80px);border-radius:999px;}
+  .glow.a{top:-120px;left:-120px;width:420px;height:420px;background:#081c8d;opacity:.65;}
+  .glow.b{bottom:-260px;right:-180px;width:620px;height:620px;background:#0dcbff;opacity:.2;}
+  .glow.c{top:46%;left:60%;transform:translate(-50%,-50%);width:380px;height:380px;background:#bff658;opacity:.1;}
+
+  main{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:56px 24px 120px;}
+
+  header.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:56px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .mark{
+    width:36px;height:36px;border-radius:10px;
+    background:linear-gradient(135deg, #bff658, #6eff00);
+    display:grid;place-items:center;color:#081c8d;font-weight:900;
+    font-family:'Fragment Mono',ui-monospace,monospace;
+    box-shadow:0 0 0 1px rgba(255,255,255,.05), 0 10px 30px -10px rgba(191,246,88,.55);
+  }
+  .brand .mark span{transform:translateY(-1px);font-size:20px;}
+  .brand .wordmark{font-family:'Fragment Mono',ui-monospace,monospace;font-size:18px;}
+  .brand .wordmark b{font-weight:400;}
+  .brand .wordmark span{color:var(--acid);}
+
+  .net{
+    display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;
+    border:1px solid var(--line);background:rgba(255,255,255,.03);
+    font-family:'Fragment Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);
+    text-decoration:none;
+  }
+  .net .dot{width:6px;height:6px;border-radius:999px;background:var(--acid);box-shadow:0 0 12px var(--acid-hot);}
+  .net:hover{color:var(--acid);border-color:var(--line-strong);}
+
+  .kicker{font-family:'Fragment Mono',monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--acid);}
+  h1{
+    font-family:'Aldrich',sans-serif;font-weight:400;letter-spacing:-.01em;line-height:1.04;
+    font-size:clamp(42px, 7vw, 76px);margin:8px 0 16px;
+  }
+  h1 .accent{background:linear-gradient(90deg,var(--acid) 0%,var(--acid-soft) 50%,var(--cyan) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .lede{color:var(--ink-muted);max-width:60ch;font-size:17px;line-height:1.65;margin:14px 0 0;}
+
+  h2{
+    font-family:'Aldrich',sans-serif;font-weight:400;font-size:26px;margin:64px 0 6px;
+    display:flex;align-items:center;gap:10px;
+  }
+  h2 .num{
+    display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;
+    background:rgba(191,246,88,.12);border:1px solid var(--line);
+    color:var(--acid);font-family:'Fragment Mono',monospace;font-size:12px;
+  }
+  .h2-sub{color:var(--ink-muted);margin:0 0 16px;font-size:15px;}
+
+  .tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+  .tab{
+    padding:8px 14px;border-radius:999px;cursor:pointer;user-select:none;
+    font-family:'Fragment Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--ink-muted);
+    transition:all .15s;
+  }
+  .tab:hover{color:var(--ink);border-color:var(--line-strong);}
+  .tab.active{background:linear-gradient(135deg, rgba(191,246,88,.2), rgba(13,203,255,.12));color:var(--acid);border-color:var(--line-strong);}
+
+  .snippet{
+    position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    background:var(--code-bg);box-shadow: 0 10px 40px -20px rgba(0,0,0,.7);
+  }
+  .snippet::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+    background:linear-gradient(180deg, var(--acid), var(--cyan));
+  }
+  pre{
+    margin:0;padding:20px 96px 20px 24px;overflow:auto;
+    font-family:'Fragment Mono',ui-monospace,monospace;font-size:13px;line-height:1.65;color:#e4e8ff;
+  }
+  pre .k{color:#0dcbff;}  /* keys */
+  pre .s{color:#bff658;}  /* strings */
+  pre .c{color:#6d7699;}  /* comments */
+  pre .p{color:#a9b1d6;}  /* punctuation */
+
+  .copy{
+    position:absolute;top:12px;right:12px;
+    background:rgba(191,246,88,.1);color:var(--acid);border:1px solid var(--line-strong);
+    padding:8px 14px;border-radius:10px;cursor:pointer;
+    font-family:'Fragment Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    transition:all .15s;
+  }
+  .copy:hover{background:rgba(191,246,88,.2);}
+  .copy.copied{background:var(--acid);color:#081c8d;border-color:var(--acid);}
+
+  .hint{color:var(--ink-muted);font-size:14px;line-height:1.6;margin:14px 0 0;}
+  .hint code{font-family:'Fragment Mono',monospace;padding:2px 6px;border-radius:6px;background:rgba(13,203,255,.1);color:#cfefff;border:1px solid rgba(13,203,255,.15);font-size:12px;}
+  .hint a{color:var(--acid);text-decoration:underline;text-underline-offset:3px;}
+
+  .cards{
+    display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin-top:36px;
+  }
+  .cap{
+    padding:16px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.25);
+  }
+  .cap .n{font-family:'Aldrich',sans-serif;font-size:26px;color:var(--acid);}
+  .cap .l{font-family:'Fragment Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);margin-top:4px;}
+
+  .tools{
+    display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:8px;margin-top:14px;
+  }
+  .tool{
+    padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.2);
+    font-family:'Fragment Mono',monospace;font-size:12px;color:var(--ink-muted);
+    display:flex;align-items:center;gap:8px;
+  }
+  .tool::before{content:"·";color:var(--acid);font-size:18px;line-height:1;}
+  .tool.dim{opacity:.5;text-decoration:line-through;}
+
+  footer{
+    margin-top:72px;padding-top:28px;border-top:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;
+    font-family:'Fragment Mono',monospace;font-size:12px;color:var(--ink-dim);
+  }
+  footer a{color:var(--ink-muted);text-decoration:none;border-bottom:1px dashed var(--line);}
+  footer a:hover{color:var(--acid);border-color:var(--line-strong);}
+
+  @media (max-width: 640px){
+    main{padding:32px 18px 80px;}
+    h1{font-size:42px;}
+    h2{font-size:22px;}
+    pre{padding:18px 70px 18px 18px;font-size:12px;}
+    .copy{top:10px;right:10px;padding:6px 10px;font-size:10px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow a"></div>
+<div class="glow b"></div>
+<div class="glow c"></div>
+
+<main>
+  <header class="top">
+    <div class="brand">
+      <div class="mark"><span>h</span></div>
+      <div class="wordmark"><b>hathor</b>&nbsp;<span>/mcp</span></div>
+    </div>
+    <a class="net" href="https://hathor.network" target="_blank" rel="noopener"><span class="dot"></span>hathor.network</a>
+  </header>
+
+  <div class="kicker">model context protocol</div>
+  <h1>Give your agent <span class="accent">superpowers</span> on Hathor.</h1>
+  <p class="lede">
+    One MCP server, 24 tools. Mint wallets, send HTR, publish blueprints, execute nano
+    contracts and inspect on-chain state — straight from Claude Desktop or Claude Code.
+    No SDKs to wire up, no keys to manage. Just paste one line.
+  </p>
+
+  <div class="cards">
+    <div class="cap"><div class="n">24</div><div class="l">tools</div></div>
+    <div class="cap"><div class="n">0</div><div class="l">setup steps</div></div>
+    <div class="cap"><div class="n">∞</div><div class="l">wallets (isolated)</div></div>
+    <div class="cap"><div class="n">testnet</div><div class="l">ready</div></div>
+  </div>
+
+  <!-- Claude Code -->
+  <h2><span class="num">1</span>Claude Code</h2>
+  <p class="h2-sub">Single command. Terminal-first.</p>
+  <div class="snippet" data-copy="claude mcp add --transport http hathor https://mcp.hathor.dev/mcp">
+    <pre><span class="p">$</span> <span class="k">claude</span> mcp add --transport http hathor <span class="s">https://mcp.hathor.dev/mcp</span></pre>
+    <button class="copy" type="button">Copy</button>
+  </div>
+  <p class="hint">
+    Prefer SSE? Use <code>--transport sse https://mcp.hathor.dev/mcp/sse</code>.
+    Already installed? List with <code>claude mcp list</code>.
+  </p>
+
+  <!-- Claude Desktop -->
+  <h2><span class="num">2</span>Claude Desktop</h2>
+  <p class="h2-sub">Edit your config file, restart Claude. Done.</p>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="macos" type="button">macOS</button>
+    <button class="tab" data-tab="windows" type="button">Windows</button>
+    <button class="tab" data-tab="linux" type="button">Linux</button>
+  </div>
+  <p class="hint" id="pathHint"><code>~/Library/Application Support/Claude/claude_desktop_config.json</code></p>
+
+  <div style="height:14px"></div>
+
+  <div class="snippet" data-copy='{
+  "mcpServers": {
+    "hathor": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.hathor.dev/mcp/sse"]
+    }
+  }
+}'>
+    <pre><span class="p">{</span>
+  <span class="k">"mcpServers"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="k">"hathor"</span><span class="p">:</span> <span class="p">{</span>
+      <span class="k">"command"</span><span class="p">:</span> <span class="s">"npx"</span><span class="p">,</span>
+      <span class="k">"args"</span><span class="p">:</span> <span class="p">[</span><span class="s">"-y"</span><span class="p">,</span> <span class="s">"mcp-remote"</span><span class="p">,</span> <span class="s">"https://mcp.hathor.dev/mcp/sse"</span><span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span></pre>
+    <button class="copy" type="button">Copy</button>
+  </div>
+  <p class="hint">
+    Merge this into your existing <code>mcpServers</code> block if you already have one —
+    don't overwrite other servers. Then quit Claude (⌘Q on macOS) and reopen it.
+  </p>
+
+  <!-- Verify -->
+  <h2><span class="num">3</span>Try it</h2>
+  <p class="h2-sub">In a fresh Claude session, paste any of these:</p>
+  <div class="snippet" data-copy="Use the hathor MCP to check the testnet node status.">
+    <pre><span class="c"># sanity check</span>
+Use the hathor MCP to check the testnet node status.</pre>
+    <button class="copy" type="button">Copy</button>
+  </div>
+  <div style="height:10px"></div>
+  <div class="snippet" data-copy="Create a wallet called alice, show its first address, then get its balance.">
+    <pre><span class="c"># wallet lifecycle</span>
+Create a wallet called alice, show its first address, then get its balance.</pre>
+    <button class="copy" type="button">Copy</button>
+  </div>
+  <div style="height:10px"></div>
+  <div class="snippet" data-copy="Publish the tic-tac-toe blueprint, instantiate a nano contract with a 1 HTR bet, and join as player 1.">
+    <pre><span class="c"># full-blown nano contract flow</span>
+Publish the tic-tac-toe blueprint, instantiate a nano contract with a 1 HTR bet,
+and join as player 1.</pre>
+    <button class="copy" type="button">Copy</button>
+  </div>
+  <p class="hint">
+    Need testnet HTR to play with? The <a href="https://faucet.hathor.dev" target="_blank" rel="noopener">faucet</a> drips on demand.
+  </p>
+
+  <!-- Tools -->
+  <h2><span class="num">4</span>What's in the box</h2>
+  <p class="h2-sub">24 tools across node, wallet, blueprint and nano-contract surfaces.</p>
+  <div class="tools">
+    <div class="tool">get_node_status</div>
+    <div class="tool">generate_seed</div>
+    <div class="tool">create_wallet</div>
+    <div class="tool">get_wallet_seed</div>
+    <div class="tool">get_wallet_status</div>
+    <div class="tool">get_wallet_balance</div>
+    <div class="tool">get_wallet_addresses</div>
+    <div class="tool">send_from_wallet</div>
+    <div class="tool">close_wallet</div>
+    <div class="tool">get_blocks</div>
+    <div class="tool">get_transaction</div>
+    <div class="tool">publish_blueprint</div>
+    <div class="tool">create_nano_contract</div>
+    <div class="tool">execute_nano_contract</div>
+    <div class="tool">get_nano_contract_state</div>
+    <div class="tool">get_nano_contract_history</div>
+    <div class="tool">get_nano_contract_logs</div>
+    <div class="tool">get_service_urls</div>
+    <div class="tool">set_service_urls</div>
+    <div class="tool">list_blueprints</div>
+    <div class="tool">get_blueprint_info</div>
+    <div class="tool">get_faucet_balance</div>
+    <div class="tool">send_from_faucet</div>
+    <div class="tool">fund_wallet</div>
+  </div>
+
+  <footer>
+    <div>
+      <a href="https://github.com/HathorNetwork/hathor-mcp" target="_blank" rel="noopener">source ↗</a>
+      &nbsp;·&nbsp;
+      <a href="https://hathor.network" target="_blank" rel="noopener">hathor.network ↗</a>
+      &nbsp;·&nbsp;
+      <a href="https://faucet.hathor.dev" target="_blank" rel="noopener">faucet ↗</a>
+      &nbsp;·&nbsp;
+      <a href="https://mcp.hathor.dev/health" target="_blank" rel="noopener">status ↗</a>
+    </div>
+    <div>mcp.hathor.dev · testnet</div>
+  </footer>
+</main>
+
+<script>
+(function(){
+  // Copy buttons
+  document.querySelectorAll('.snippet').forEach(s => {
+    const btn = s.querySelector('.copy');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      const txt = s.getAttribute('data-copy') || s.querySelector('pre').innerText;
+      try {
+        await navigator.clipboard.writeText(txt);
+      } catch (e) {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = txt;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch(_) {}
+        document.body.removeChild(ta);
+      }
+      btn.classList.add('copied');
+      const orig = btn.textContent;
+      btn.textContent = 'Copied ✓';
+      setTimeout(() => { btn.classList.remove('copied'); btn.textContent = orig; }, 1400);
+    });
+  });
+
+  // OS tabs for Claude Desktop config path
+  const paths = {
+    macos:   '~/Library/Application Support/Claude/claude_desktop_config.json',
+    windows: '%APPDATA%\\Claude\\claude_desktop_config.json',
+    linux:   '~/.config/Claude/claude_desktop_config.json',
+  };
+  const pathHint = document.getElementById('pathHint');
+  // Detect
+  const ua = navigator.userAgent.toLowerCase();
+  let detected = 'macos';
+  if (ua.includes('win')) detected = 'windows';
+  else if (ua.includes('linux') && !ua.includes('android')) detected = 'linux';
+
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      const os = t.dataset.tab;
+      pathHint.innerHTML = '<code>' + paths[os] + '</code>';
+    });
+    if (t.dataset.tab === detected) t.click();
+  });
+})();
+</script>
+
+</body>
+</html>

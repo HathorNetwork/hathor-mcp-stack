@@ -1,0 +1,5 @@
+.deploy
+.env
+.env.local
+/faucet/target
+target/

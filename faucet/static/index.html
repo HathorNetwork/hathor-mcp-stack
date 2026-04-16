@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Hathor Testnet Faucet</title>
+<meta name="description" content="Dynamic Hathor testnet faucet. Send HTR to your testnet address in one click." />
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAG1BMVEVMaXEjHh8jHiAjHh8jHx8jHx8jHyAiHx8jHyAcA8nyAAAACHRSTlMA+bgp2IhuVZDwydoAAAAJcEhZcwAACxMAAAsTAQCanBgAAAG8SURBVHjarZfbAoMgCEBDQPz/L56pm12QNMbLWspJERC2bSAoHAIRAFEILLgtCTJBOgkQzzMiFZUsTbk9UZxSZyg66SLlDfDz10HT7gywV4EhT0mG5MFg2ELAVq8IkOHu07N+mTKwRJhRr4jg0h8QFvRVAq/o74SLHWRNfyeczgIX1QsC3xpAMUO86YOgoG0XSN2rQV/fk2HAOIEZQD8JSO9W8F1CTG+30KxAFgCgZ6Y7gIoPDA/5sIIRA0dO3AA5D3KMzKQHejUjjQHwyz6iz9r3oHtxAUR+dNY8T0YDM/G+hxTbgGyAdqMg6EYIFkDqWBg6bB6yAFJvpRZ4qIckGYDvGKT29y6kvm0AvISN9i3adAf5eiIck4d6Dpvho3LJPjqAlDuUiAog/8IDgO4bO6aqpmQCggeg+sEqgO+AELuQaYP9fGfuJAMgeox0eTjG3V9opirRATUpXo2Q94VdTCNWF8fk8ANUYmQe0NL69WI5b4Ea4PesfepFcXC+XTm9QhzKHPAtQL9eJxYQ/1fi+Issd5nnLzT9pa6/2PaX+/6Gw9/y+Jsuf9v3h8bz3PrC6WGy9f1D873U/n8AeOpToAtAg9AAAAAASUVORK5CYII=" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Aldrich&family=Fragment+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --navy-900:#000e5e;
+    --navy-800:#081c8d;
+    --navy-950:#050a38;
+    --bg:#000829;
+    --ink:#ffffff;
+    --ink-muted:#a9b1d6;
+    --ink-dim:#6d7699;
+    --line:rgba(191,246,88,.18);
+    --line-strong:rgba(191,246,88,.45);
+    --acid:#bff658;
+    --acid-soft:#9cf35b;
+    --acid-hot:#6eff00;
+    --cyan:#0dcbff;
+    --danger:#ff6b8a;
+    --shadow: 0 20px 80px -20px rgba(13,203,255,.22), 0 0 120px -40px rgba(191,246,88,.15);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;min-height:100%;}
+  body{
+    background:
+      radial-gradient(1000px 700px at 85% -10%, rgba(13,203,255,.18), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(191,246,88,.14), transparent 60%),
+      linear-gradient(180deg, #000829 0%, #000616 100%);
+    overflow-x:hidden;
+  }
+  /* Subtle animated grid backdrop */
+  .grid-bg{
+    position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.35;
+    background-image:
+      linear-gradient(rgba(13,203,255,.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,203,255,.08) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+  }
+  .glow{
+    position:fixed;z-index:0;pointer-events:none;filter:blur(80px);border-radius:999px;
+  }
+  .glow.a{top:-120px;left:-120px;width:420px;height:420px;background:#081c8d;opacity:.65;}
+  .glow.b{bottom:-200px;right:-150px;width:540px;height:540px;background:#0dcbff;opacity:.22;}
+  .glow.c{top:40%;left:50%;transform:translate(-50%,-50%);width:320px;height:320px;background:#bff658;opacity:.12;}
+
+  main{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:56px 24px 120px;}
+
+  header.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:48px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .mark{
+    width:36px;height:36px;border-radius:10px;
+    background:linear-gradient(135deg, #bff658, #6eff00);
+    display:grid;place-items:center;color:#081c8d;font-weight:900;
+    font-family:'Fragment Mono',ui-monospace,monospace;
+    box-shadow:0 0 0 1px rgba(255,255,255,.05), 0 10px 30px -10px rgba(191,246,88,.55);
+  }
+  .brand .mark span{transform:translateY(-1px);font-size:20px;letter-spacing:-.02em;}
+  .brand .wordmark{font-family:'Fragment Mono',ui-monospace,monospace;font-size:18px;letter-spacing:.02em;}
+  .brand .wordmark b{font-weight:400;color:var(--ink);}
+  .brand .wordmark span{color:var(--acid);}
+
+  .net{
+    display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;
+    border:1px solid var(--line);background:rgba(255,255,255,.03);
+    font-family:'Fragment Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);
+  }
+  .net .dot{width:6px;height:6px;border-radius:999px;background:var(--acid);box-shadow:0 0 12px var(--acid-hot);}
+
+  h1{
+    font-family:'Aldrich',sans-serif;font-weight:400;letter-spacing:-.01em;line-height:1.05;
+    font-size:clamp(40px, 7vw, 68px);margin:8px 0 12px;
+  }
+  h1 .accent{background:linear-gradient(90deg,var(--acid) 0%,var(--acid-soft) 50%,var(--cyan) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .kicker{font-family:'Fragment Mono',monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--acid);}
+  .sub{color:var(--ink-muted);max-width:55ch;font-size:16px;line-height:1.6;margin:14px 0 36px;}
+
+  .card{
+    position:relative;
+    border:1px solid var(--line);border-radius:20px;
+    background:linear-gradient(180deg, rgba(10,18,60,.75), rgba(5,10,40,.65));
+    backdrop-filter: blur(10px);
+    padding:28px;box-shadow:var(--shadow);
+  }
+  .card::before{
+    content:"";position:absolute;inset:-1px;border-radius:21px;pointer-events:none;
+    background:linear-gradient(135deg, rgba(191,246,88,.35), transparent 40%, rgba(13,203,255,.2) 100%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;mask-composite: exclude;padding:1px;
+  }
+
+  .row{display:flex;gap:12px;align-items:stretch;}
+  label{display:block;font-family:'Fragment Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:10px;}
+  input[type=text]{
+    flex:1;min-width:0;height:56px;border-radius:14px;border:1px solid var(--line);
+    background:rgba(0,0,0,.35);color:var(--ink);
+    padding:0 18px;font-family:'Fragment Mono',ui-monospace,monospace;font-size:15px;letter-spacing:.02em;
+    outline:none;transition:border-color .15s, box-shadow .15s;
+  }
+  input[type=text]::placeholder{color:var(--ink-dim);opacity:.8}
+  input[type=text]:focus{border-color:var(--line-strong);box-shadow:0 0 0 3px rgba(191,246,88,.15);}
+  button.primary{
+    height:56px;padding:0 22px;border-radius:14px;border:0;cursor:pointer;
+    background:linear-gradient(135deg,var(--acid),var(--acid-soft));
+    color:#081c8d;font-family:'Aldrich',sans-serif;font-size:15px;letter-spacing:.06em;text-transform:uppercase;
+    font-weight:600;transition:transform .1s ease, filter .15s, box-shadow .15s;
+    box-shadow:0 10px 30px -10px rgba(191,246,88,.65), inset 0 0 0 1px rgba(255,255,255,.25);
+    white-space:nowrap;
+  }
+  button.primary:hover:not(:disabled){filter:brightness(1.05);transform:translateY(-1px);}
+  button.primary:active:not(:disabled){transform:translateY(0);}
+  button.primary:disabled{opacity:.55;cursor:not-allowed;}
+
+  .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:20px;}
+  .stat{
+    padding:16px;border:1px solid var(--line);border-radius:14px;
+    background:rgba(0,0,0,.25);
+  }
+  .stat .k{font-family:'Fragment Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:8px;}
+  .stat .v{font-family:'Aldrich',sans-serif;font-size:22px;color:var(--ink);}
+  .stat .v small{font-size:11px;color:var(--ink-dim);letter-spacing:.1em;margin-left:4px;font-family:'Fragment Mono',monospace;}
+  .stat.highlight .v{color:var(--acid);}
+
+  .msg{margin-top:18px;padding:14px 16px;border-radius:12px;font-size:14px;line-height:1.5;display:none;}
+  .msg.show{display:block;}
+  .msg.ok{background:rgba(191,246,88,.1);border:1px solid rgba(191,246,88,.35);color:#e6ffc0;}
+  .msg.err{background:rgba(255,107,138,.1);border:1px solid rgba(255,107,138,.35);color:#ffd0da;}
+  .msg a{color:var(--acid);text-decoration:underline;text-underline-offset:3px;}
+
+  .tier-chip{
+    display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
+    font-family:'Fragment Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+    border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--ink-muted);margin-left:8px;
+  }
+  .tier-chip.generous{color:#d1ffa0;border-color:rgba(191,246,88,.55);}
+  .tier-chip.healthy{color:#bff658;border-color:rgba(191,246,88,.4);}
+  .tier-chip.modest{color:#ffd36b;border-color:rgba(255,211,107,.35);}
+  .tier-chip.trickle{color:#ffa36b;border-color:rgba(255,163,107,.35);}
+  .tier-chip.empty{color:#ff6b8a;border-color:rgba(255,107,138,.5);}
+
+  .foot{
+    margin-top:36px;display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between;
+    font-family:'Fragment Mono',monospace;font-size:12px;color:var(--ink-dim);
+  }
+  .foot a{color:var(--ink-muted);text-decoration:none;border-bottom:1px dashed var(--line);}
+  .foot a:hover{color:var(--acid);border-color:var(--line-strong);}
+
+  .addr-mono{font-family:'Fragment Mono',monospace;font-size:12px;color:var(--ink-muted);word-break:break-all;}
+
+  .spin{
+    display:inline-block;width:14px;height:14px;border-radius:50%;
+    border:2px solid rgba(8,28,141,.35);border-top-color:#081c8d;
+    animation:spin .8s linear infinite;margin-right:8px;vertical-align:-2px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  @media (max-width: 560px){
+    main{padding:28px 18px 80px;}
+    .row{flex-direction:column;}
+    .stats{grid-template-columns:1fr;}
+    h1{font-size:40px;}
+  }
+
+  /* Confetti for successful drip — pure CSS, no deps */
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:3;overflow:hidden;display:none;}
+  .confetti.show{display:block;}
+  .confetti i{
+    position:absolute;top:-20px;width:8px;height:14px;opacity:.9;border-radius:1px;
+    animation: fall 2.6s linear forwards;
+  }
+  @keyframes fall{
+    0%{transform: translate3d(0,-20vh,0) rotate(0);}
+    100%{transform: translate3d(var(--dx,0px), 110vh, 0) rotate(720deg);}
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow a"></div>
+<div class="glow b"></div>
+<div class="glow c"></div>
+
+<main>
+  <header class="top">
+    <div class="brand">
+      <div class="mark"><span>h</span></div>
+      <div class="wordmark"><b>hathor</b>&nbsp;<span>/faucet</span></div>
+    </div>
+    <div class="net"><span class="dot"></span><span id="netLabel">testnet</span></div>
+  </header>
+
+  <div class="kicker">drip without ceremony</div>
+  <h1>Claim <span class="accent">testnet HTR</span><br/>for building.</h1>
+  <p class="sub">Paste a testnet address and we'll send you a drip. The amount scales with whatever's left in the tank — so if it's dry, be kind, ping us.</p>
+
+  <section class="card">
+    <label for="address">Testnet address</label>
+    <div class="row">
+      <input id="address" type="text" autocomplete="off" spellcheck="false" placeholder="Wxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+      <button id="drip" class="primary" type="button">Drip me HTR</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat highlight">
+        <div class="k">drip size</div>
+        <div class="v"><span id="dripAmt">—</span><small>HTR</small><span id="tier" class="tier-chip"></span></div>
+      </div>
+      <div class="stat">
+        <div class="k">faucet balance</div>
+        <div class="v"><span id="bal">—</span><small>HTR</small></div>
+      </div>
+      <div class="stat">
+        <div class="k">per IP cooldown</div>
+        <div class="v">24<small>HOURS</small></div>
+      </div>
+    </div>
+
+    <div id="msg" class="msg"></div>
+
+    <div class="foot">
+      <div>
+        <span style="color:var(--ink-dim)">funding:</span>
+        <span id="faucetAddr" class="addr-mono">loading…</span>
+      </div>
+      <div>
+        <a id="explorerLink" href="https://explorer.testnet.hathor.network/" target="_blank" rel="noopener">explorer ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot" style="margin-top:28px;">
+    <div style="color:var(--ink-dim)">built on hathor · <a href="https://mcp.hathor.dev" target="_blank" rel="noopener">try the MCP</a></div>
+    <div style="color:var(--ink-dim)">drip scales with balance · no signup</div>
+  </div>
+</main>
+
+<div id="confetti" class="confetti"></div>
+
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => {
+    if (n === null || n === undefined || Number.isNaN(n)) return '—';
+    if (n === 0) return '0';
+    if (n >= 1000) return n.toLocaleString(undefined,{maximumFractionDigits:0});
+    if (n >= 1) return n.toFixed(2);
+    return n.toFixed(2);
+  };
+
+  async function loadStatus(){
+    try{
+      const r = await fetch('/api/status', {cache:'no-store'});
+      if (!r.ok) throw new Error('status ' + r.status);
+      const s = await r.json();
+      $('bal').textContent = fmt(s.balance_htr);
+      $('dripAmt').textContent = fmt(s.drip_htr);
+      $('netLabel').textContent = s.network || 'testnet';
+      $('faucetAddr').textContent = s.address || '(not ready)';
+      const tier = $('tier');
+      tier.className = 'tier-chip ' + (s.tier || '');
+      tier.textContent = s.tier ? '· ' + s.tier : '';
+      const btn = $('drip');
+      if (!s.available) {
+        btn.disabled = true;
+        btn.textContent = 'Faucet is dry';
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Drip me HTR';
+      }
+    }catch(e){
+      showMsg('err', 'could not load faucet status: ' + e.message);
+    }
+  }
+
+  function showMsg(kind, html){
+    const el = $('msg');
+    el.className = 'msg show ' + kind;
+    el.innerHTML = html;
+  }
+
+  function confetti(){
+    const c = $('confetti');
+    c.innerHTML = '';
+    const colors = ['#bff658','#9cf35b','#6eff00','#0dcbff','#ffffff'];
+    const n = 80;
+    for (let i=0;i<n;i++){
+      const p = document.createElement('i');
+      const x = Math.random()*100;
+      const dx = (Math.random()-0.5)*200;
+      const delay = Math.random()*300;
+      const dur = 2000 + Math.random()*1400;
+      p.style.left = x + 'vw';
+      p.style.setProperty('--dx', dx + 'px');
+      p.style.background = colors[Math.floor(Math.random()*colors.length)];
+      p.style.animationDuration = dur + 'ms';
+      p.style.animationDelay = delay + 'ms';
+      c.appendChild(p);
+    }
+    c.classList.add('show');
+    setTimeout(() => c.classList.remove('show'), 3500);
+  }
+
+  async function drip(){
+    const addr = $('address').value.trim();
+    if (!addr) {
+      showMsg('err', 'paste a testnet address first.');
+      return;
+    }
+    const btn = $('drip');
+    const old = btn.textContent;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span>sending…';
+    try{
+      const r = await fetch('/api/drip', {
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body: JSON.stringify({address: addr}),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (r.ok && data.success) {
+        const tx = data.tx_hash ? `<br/><span class="addr-mono">tx: <a href="https://explorer.testnet.hathor.network/transaction/${data.tx_hash}" target="_blank" rel="noopener">${data.tx_hash}</a></span>` : '';
+        showMsg('ok', `sent ${fmt(data.amount_htr)} HTR — it should land in your wallet in a few seconds.${tx}`);
+        confetti();
+        loadStatus();
+      } else {
+        const err = data.error || ('request failed (' + r.status + ')');
+        if (data.retry_after_secs) {
+          const hrs = Math.ceil(data.retry_after_secs/3600);
+          showMsg('err', `${err} — try again in ~${hrs}h.`);
+        } else {
+          showMsg('err', err);
+        }
+      }
+    }catch(e){
+      showMsg('err', 'network error: ' + e.message);
+    }finally{
+      btn.disabled = false;
+      btn.textContent = old;
+    }
+  }
+
+  $('drip').addEventListener('click', drip);
+  $('address').addEventListener('keydown', (e) => { if (e.key === 'Enter') drip(); });
+
+  loadStatus();
+  setInterval(loadStatus, 30000);
+})();
+</script>
+
+</body>
+</html>

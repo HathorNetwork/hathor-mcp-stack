@@ -60,3 +60,71 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+  # Dedicated wallet-headless container for the public faucet.
+  # Not managed by the orchestrator — we want it stable & always-on so
+  # the faucet frontend can always show a balance.
+  faucet-wallet:
+    image: hathornetwork/hathor-wallet-headless:latest
+    environment:
+      HEADLESS_HTTP_BIND: "0.0.0.0"
+      HEADLESS_HTTP_PORT: "8000"
+      HEADLESS_NETWORK: "testnet"
+      HEADLESS_SERVER: "https://node1.playground.testnet.hathor.network/v1a/"
+      HEADLESS_TX_MINING_URL: "https://txmining.playground.testnet.hathor.network/"
+      HEADLESS_API_KEY: "${FAUCET_API_KEY}"
+      HEADLESS_SEED_DEFAULT: "${FAUCET_SEED}"
+    networks:
+      - stack
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/ || exit 0"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # Hathor testnet faucet — beautiful frontend + tiny Rust backend
+  # that drips HTR with a tier that scales with the faucet balance
+  # and a 24h per-IP cooldown.
+  faucet:
+    build:
+      context: ./faucet
+    command:
+      - "--port=8200"
+      - "--wallet-url=http://faucet-wallet:8000"
+      - "--wallet-id=faucet"
+    environment:
+      FAUCET_API_KEY: "${FAUCET_API_KEY}"
+      FAUCET_SEED: "${FAUCET_SEED}"
+      RUST_LOG: "info,tower_http=info,hathor_faucet=info"
+    networks:
+      - stack
+    ports:
+      - "8200:8200"
+    restart: unless-stopped
+    depends_on:
+      - faucet-wallet
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8200/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # Static documentation site that tells users how to add the Hathor
+  # MCP to Claude Desktop / Claude Code with "press to copy" snippets.
+  mcp-docs:
+    build:
+      context: ./mcp-docs
+    networks:
+      - stack
+    ports:
+      - "8300:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
