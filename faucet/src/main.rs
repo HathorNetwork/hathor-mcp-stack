@@ -412,19 +412,32 @@ async fn main() -> anyhow::Result<()> {
         last_drip: Arc::new(Mutex::new(HashMap::new())),
     };
 
-    // Fire-and-forget wallet bootstrap — retry a few times
+    // Fire-and-forget wallet bootstrap. Retries forever with exponential
+    // backoff capped at 60s — the faucet is useless until the wallet is
+    // loaded, so we never "give up".
     let bootstrap_state = state.clone();
     tokio::spawn(async move {
-        for attempt in 1..=20 {
+        let mut delay = Duration::from_secs(2);
+        loop {
             match ensure_wallet_started(&bootstrap_state).await {
-                Ok(_) => return,
-                Err(e) => {
-                    warn!(attempt, "wallet bootstrap failed: {e}");
-                    tokio::time::sleep(Duration::from_secs(5)).await;
+                Ok(_) => {
+                    // Verify by reading an address — /start may succeed but
+                    // take a few seconds to index the first address.
+                    match faucet_address(&bootstrap_state).await {
+                        Ok(addr) => {
+                            info!(%addr, "faucet wallet ready");
+                            return;
+                        }
+                        Err(e) => {
+                            warn!("wallet started but address not ready yet: {e}");
+                        }
+                    }
                 }
+                Err(e) => warn!("wallet bootstrap attempt failed: {e}"),
             }
+            tokio::time::sleep(delay).await;
+            delay = (delay * 2).min(Duration::from_secs(60));
         }
-        error!("wallet never came up — /api/drip will return errors until it does");
     });
 
     let app = Router::new()
