@@ -19,6 +19,7 @@ services:
       - "--network=testnet"
       - "--docker-network=hathor-mcp-stack"
       - "--headless-image=hathornetwork/hathor-wallet-headless:latest"
+      - "--tx-mining-url=https://txmining.playground.testnet.hathor.network/"
       - "--idle-timeout-secs=1800"
       - "--max-instances=50"
     volumes:
